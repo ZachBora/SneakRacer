@@ -1,0 +1,9 @@
+name: SneakRacer
+main: com.worldcretornica.sneakracer.SneakRacer
+version: 1.0
+description: >
+             Permits players to move forward on specific blocks using the sneak key
+commands:
+    sneakracer:
+        description: Defines a racer. Redo the command to disable.
+        usage: sneakracer
