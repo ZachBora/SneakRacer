@@ -44,48 +44,46 @@ public class SneakListener extends PlayerListener {
 		        if (rot < 0) {
 		            rot += 360.0;
 		        }
-		        		
-		        String dir = "";
-		        
+		        				        
 		        //Find direction
 				if (0 <= rot && rot < 22.5 || 337.5 <= rot && rot < 360)
 				{
 					//X -
 					dest.subtract(blockpower, 0, 0);
-					dir = "Going NORTH";
+					// "Going NORTH";
 				}else if (22.5 <= rot && rot < 67.5)
 				{
 					//X -
 					//Z -
 					dest.subtract(blockpower, 0, blockpower);
-					dir = "Going NORTH EAST";
+					// "Going NORTH EAST";
 				}else if (67.5 <= rot && rot < 112.5) {
 					//Z -
 					dest.subtract(0, 0, blockpower);
-					dir = "Going EAST";
+					// "Going EAST";
 		        } else if (112.5 <= rot && rot < 157.5) {
 		        	//Z -
 		        	//X +
 		        	dest.subtract(-blockpower, 0, blockpower);
-		            dir = "Going SOUTH EAST";
+		            // "Going SOUTH EAST";
 		        } else if (157.5 <= rot && rot < 202.5) {
 		        	//X +
 		        	dest.subtract(-blockpower, 0, 0);
-					dir = "Going SOUTH";
+					// "Going SOUTH";
 		        } else if (202.5 <= rot && rot < 247.5) {
 		        	//X +
 		        	//Z +
 		        	dest.subtract(-blockpower, 0, -blockpower);
-		            dir = "Going SOUTH WEST";
+		            // "Going SOUTH WEST";
 		        } else if (247.5 <= rot && rot < 292.5) {
 		        	//Z +
 		        	dest.subtract(0, 0, -blockpower);
-					dir = "Going WEST";
+					// "Going WEST";
 		        } else if (292.5 <= rot && rot < 337.5) {
 		        	//Z +
 		        	//X -
 		        	dest.subtract(blockpower, 0, -blockpower);
-		            dir = "Going NORTH WEST";
+		            // "Going NORTH WEST";
 		        }
 				
 				//Check if destination block is higher or lower
@@ -122,7 +120,7 @@ public class SneakListener extends PlayerListener {
 							dest.setYaw((float) (dest.getYaw()-45));
 						}
 					}
-					dir = "Going NORTH";
+					//dir = "Going NORTH";
 				}else if (22.5 <= rot && rot < 67.5)
 				{
 					//X -

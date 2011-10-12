@@ -1,6 +1,6 @@
 name: SneakRacer
 main: com.worldcretornica.sneakracer.SneakRacer
-version: 1.0
+version: 1.1
 description: >
              Permits players to move forward on specific blocks using the sneak key
 commands:

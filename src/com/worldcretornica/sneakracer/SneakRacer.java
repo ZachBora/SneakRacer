@@ -1,7 +1,7 @@
 package com.worldcretornica.sneakracer;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,13 +12,17 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.config.Configuration;
+
+import ru.tehkode.permissions.PermissionManager;
+import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 import com.nijiko.permissions.PermissionHandler;
 import com.nijikokun.bukkit.Permissions.Permissions;
@@ -37,10 +41,11 @@ public class SneakRacer extends JavaPlugin {
 	public Material raceblock;
 	public int boostervalue;
 	
-	private Configuration config;
+	private YamlConfiguration config;
 	
 	// Permissions
     public PermissionHandler permissions;
+    public PermissionManager permpex;
     boolean permissions3;
 	
 	@Override
@@ -120,15 +125,29 @@ public class SneakRacer extends JavaPlugin {
 	private void checkConfig()
 	{
 		File file = new File(this.getDataFolder(), "config.yml");		
-		config = new Configuration(file);
+		config = new YamlConfiguration();
 		if (!file.exists())
 		{
-			config.setHeader("# SneakRacer Config","#Block id for the race road");
-			config.setProperty("RoadBlock", 35);
-			config.setProperty("BoosterValue", 14);
-			config.save();
+			config.createSection("# SneakRacer Config");
+			config.createSection("#Block id for the race road");
+			config.set("RoadBlock", 35);
+			config.set("BoosterValue", 14);
+			try {
+				config.save(file);
+			} catch (IOException e) {
+				logger.severe("[" + pdfdescription + "] IOException: " + e.getMessage());
+			}
+		}else{
+			try {
+				config.load(file);
+			} catch (FileNotFoundException e) {
+				logger.severe("[" + pdfdescription + "] FileNotFound: " + e.getMessage());
+			} catch (IOException e) {
+				logger.severe("[" + pdfdescription + "] IOException: " + e.getMessage());
+			} catch (InvalidConfigurationException e) {
+				logger.severe("[" + pdfdescription + "] Invalid Configuration: " + e.getMessage());
+			}
 		}
-		config.load();
 	}
 	
 	private void setupPermissions() {
@@ -136,9 +155,18 @@ public class SneakRacer extends JavaPlugin {
             return;
         
         Plugin permTest = this.getServer().getPluginManager().getPlugin("Permissions");
+        Plugin pexTest = this.getServer().getPluginManager().getPlugin("PermissionsEx");
         
         // Check to see if Permissions exists
-        if (permTest == null) {
+        if (pexTest != null)
+    	{
+    		// We're using Permissions
+    		permpex = PermissionsEx.getPermissionManager();
+        	// Check for Permissions 3
+        	permissions3 = false;
+        	logger.info("[" + pdfdescription + "] PermissionsEx " + pexTest.getDescription().getVersion() + " found");
+        	return;
+    	}else if (permTest == null) {
         	logger.info("[" + pdfdescription + "] Permissions not found, using SuperPerms");
         	return;
         }
@@ -148,7 +176,7 @@ public class SneakRacer extends JavaPlugin {
     		return;
     	}
     	
-    	// We're using Permissions
+		// We're using Permissions
     	permissions = ((Permissions) permTest).getHandler();
     	// Check for Permissions 3
     	permissions3 = permTest.getDescription().getVersion().startsWith("3");
@@ -160,8 +188,12 @@ public class SneakRacer extends JavaPlugin {
         if (this.permissions != null) {
             if (this.permissions.has(player, node))
                 return true;
+        // Pex
+        } else if(this.permpex != null) {
+        	if (this.permpex.has(player, node))
+        		return true;
         // SuperPerms
-        } else if (player.hasPermission(node)) {
+        } else if (player.hasPermission(node) || player.hasPermission(pdfdescription + ".*") || player.hasPermission("*")) {
               return true;
         } else if (player.isOp()) {
             return true;
