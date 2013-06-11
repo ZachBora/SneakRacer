@@ -15,21 +15,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import ru.tehkode.permissions.PermissionManager;
-import ru.tehkode.permissions.bukkit.PermissionsEx;
-
-import com.nijiko.permissions.PermissionHandler;
-import com.nijikokun.bukkit.Permissions.Permissions;
-
-public class SneakRacer extends JavaPlugin {
-
-	public final SneakListener speedlistener = new SneakListener(this);
+public class SneakRacer extends JavaPlugin 
+{
 	
 	public final Set<Player> speedplayers = new HashSet<Player>();
 	
@@ -43,11 +34,6 @@ public class SneakRacer extends JavaPlugin {
 	
 	private YamlConfiguration config;
 	
-	// Permissions
-    public PermissionHandler permissions;
-    public PermissionManager permpex;
-    boolean permissions3;
-	
 	@Override
 	public void onDisable() {
 		speedplayers.clear();
@@ -57,13 +43,12 @@ public class SneakRacer extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		PluginManager pm = getServer().getPluginManager();
-		pm.registerEvent(Event.Type.PLAYER_TOGGLE_SNEAK, this.speedlistener, Event.Priority.Normal, this);		
+		pm.registerEvents(new SneakListener(this), this);		
 		
 		PluginDescriptionFile pdfFile = this.getDescription();
 		pdfdescription = pdfFile.getName();
 		pdfversion = pdfFile.getVersion();
 		
-		setupPermissions();
 		checkConfig();
 		
 		raceblock = Material.getMaterial(config.getInt("RaceBlockId", 35));
@@ -79,7 +64,6 @@ public class SneakRacer extends JavaPlugin {
 		{
 			if (sender instanceof Player)
 			{
-				sender.sendMessage(ChatColor.BLUE + pdfdescription + "  v" + pdfversion);
 				if (!this.checkPermissions((Player) sender, "SneakRacer.racer"))
 				{
 					sender.sendMessage("[" + pdfdescription + "] Permissions Denied");
@@ -150,55 +134,14 @@ public class SneakRacer extends JavaPlugin {
 		}
 	}
 	
-	private void setupPermissions() {
-        if(permissions != null)
-            return;
-        
-        Plugin permTest = this.getServer().getPluginManager().getPlugin("Permissions");
-        Plugin pexTest = this.getServer().getPluginManager().getPlugin("PermissionsEx");
-        
-        // Check to see if Permissions exists
-        if (pexTest != null)
-    	{
-    		// We're using Permissions
-    		permpex = PermissionsEx.getPermissionManager();
-        	// Check for Permissions 3
-        	permissions3 = false;
-        	logger.info("[" + pdfdescription + "] PermissionsEx " + pexTest.getDescription().getVersion() + " found");
-        	return;
-    	}else if (permTest == null) {
-        	logger.info("[" + pdfdescription + "] Permissions not found, using SuperPerms");
-        	return;
-        }
-    	// Check if it's a bridge
-    	if (permTest.getDescription().getVersion().startsWith("2.7.7")) {
-    		logger.info("[" + pdfdescription + "] Found Permissions Bridge. Using SuperPerms");
-    		return;
-    	}
-    	
-		// We're using Permissions
-    	permissions = ((Permissions) permTest).getHandler();
-    	// Check for Permissions 3
-    	permissions3 = permTest.getDescription().getVersion().startsWith("3");
-    	logger.info("[" + pdfdescription + "] Permissions " + permTest.getDescription().getVersion() + " found");
-    }
-	
-	public Boolean checkPermissions(Player player, String node) {
-    	// Permissions
-        if (this.permissions != null) {
-            if (this.permissions.has(player, node))
-                return true;
-        // Pex
-        } else if(this.permpex != null) {
-        	if (this.permpex.has(player, node))
-        		return true;
-        // SuperPerms
-        } else if (player.hasPermission(node) || player.hasPermission(pdfdescription + ".*") || player.hasPermission("*")) {
+	public Boolean checkPermissions(Player player, String node) 
+	{
+		if (player.hasPermission(node) || player.hasPermission(pdfdescription + ".*") || player.hasPermission("*") || player.isOp()) 
+		{
               return true;
-        } else if (player.isOp()) {
-            return true;
+        } else {
+        	return false;
         }
-        return false;
     }
 
 }

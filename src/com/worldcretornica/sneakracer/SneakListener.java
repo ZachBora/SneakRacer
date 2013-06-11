@@ -1,12 +1,18 @@
 package com.worldcretornica.sneakracer;
 
+import net.minecraft.server.v1_5_R2.EntityPlayer;
+import net.minecraft.server.v1_5_R2.Packet11PlayerPosition;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_5_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
-public class SneakListener extends PlayerListener {
+public class SneakListener implements Listener 
+{
 	public static SneakRacer plugin;
 	
 	public SneakListener(SneakRacer instance)
@@ -14,14 +20,15 @@ public class SneakListener extends PlayerListener {
 		plugin = instance;
 	}
 	
-	@Override
-	public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
+	@EventHandler()
+	public void onPlayerToggleSneak(final PlayerToggleSneakEvent event) 
+	{
 		
 		Player player = event.getPlayer();
 				
 		if (plugin.IsSpeedRacer(player) && event.isSneaking())
 		{
-			Location playerloc = player.getLocation();
+			Location playerloc = player.getLocation().clone();
 			
 			playerloc.subtract(0, 1, 0);
 			
@@ -34,7 +41,7 @@ public class SneakListener extends PlayerListener {
 				int blockpower = 1;
 				
 				if (dest.clone().getBlock().getType() == plugin.raceblock &&
-						dest.clone().getBlock().getState().getData().getData() == plugin.boostervalue)
+						dest.clone().getBlock().getData() == plugin.boostervalue)
 				{
 					blockpower = 2;
 				}
@@ -223,10 +230,38 @@ public class SneakListener extends PlayerListener {
 		        //player.sendMessage("On race track. " + dir);
 		        
 		        if (dest.getBlock().getType() == plugin.raceblock || dest.getBlock().getType() == Material.AIR)
-		        	player.teleport(dest.clone().add(0, 1, 0));
+		        {
+		        	//player.teleport(dest.clone().add(0, 1, 0));
+		        	customteleport(player, dest.clone().add(0, 1, 0));
+		        	
+		        	//CraftServer 
+		        	//server.getHandle().moveToWorld(entity, toWorld.dimension, true, to, true);
+		        }
 			}
 		}
 		
+	}
+	
+	
+	public void customteleport(Player p, Location l)
+	{
+		EntityPlayer ep = ((CraftPlayer) p).getHandle();
+				
+		double d0, d1, d2;
+
+        d0 = l.getX();
+        d1 = l.getY();
+        d2 = l.getZ();
+        
+        ep.setPosition(d0, d1, d2);
+        
+        Packet11PlayerPosition pack = new Packet11PlayerPosition();
+        pack.x = d0;
+        pack.y = d1 + 1.6200000047683716D;
+        pack.stance = d1;
+        pack.z = d2;
+        
+        ep.playerConnection.sendPacket(pack);
 	}
 	
 }
